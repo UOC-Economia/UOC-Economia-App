@@ -19,7 +19,7 @@
   html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--light); }
 
   /* ── LAYOUT ── */
-  #app { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; background: var(--light); position: relative; }
+  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-width: 480px; margin: 0 auto; background: var(--light); position: relative; }
   .topbar { background: var(--navy); padding: 44px 18px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .logo-mark { width: 28px; height: 28px; background: var(--red); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 600; flex-shrink: 0; }
   .logo-text { color: #fff; font-size: 13px; font-weight: 500; }
@@ -29,7 +29,7 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
   /* ── BOTTOM NAV ── */
-  .bottom-nav { background: #fff; border-top: 0.5px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .bottom-nav { background: #fff; border-top: 0.5px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 8px); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; min-height: 56px; }
   .bottom-nav::-webkit-scrollbar { display: none; }
   .nav-item { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 6px; cursor: pointer; border: none; background: transparent; }
   .nav-item svg { width: 22px; height: 22px; }
