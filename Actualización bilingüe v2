@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Grado de Economía · UOC</title>
+<style>
+  :root {
+    --navy: #002147;
+    --red: #FF7D87;
+    --cyan: #73EDFF;
+    --white: #ffffff;
+    --light: #f8fafc;
+    --muted: #6b7a8d;
+    --border: rgba(0,33,71,0.12);
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--light); }
+
+  /* ── LAYOUT ── */
+  #app { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; background: var(--light); position: relative; }
+  .topbar { background: var(--navy); padding: 44px 18px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .logo-mark { width: 28px; height: 28px; background: var(--red); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .logo-text { color: #fff; font-size: 13px; font-weight: 500; }
+  .screens { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+  .screen { display: none; padding: 20px 16px 24px; animation: fadeIn 0.2s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav { background: #fff; border-top: 0.5px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .bottom-nav::-webkit-scrollbar { display: none; }
+  .nav-item { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 6px; cursor: pointer; border: none; background: transparent; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-label { font-size: 9px; color: var(--muted); }
+  .nav-item.active .nav-label { color: var(--navy); font-weight: 500; }
+  .nav-item.active svg path, .nav-item.active svg rect, .nav-item.active svg circle,
+  .nav-item.active svg polyline, .nav-item.active svg line, .nav-item.active svg polygon { stroke: var(--navy); }
+
+  /* ── COMMON COMPONENTS ── */
+  .section-label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 4px; }
+  .card { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); }
+  .hero-card { background: var(--navy); border-radius: 18px; padding: 22px 20px; position: relative; overflow: hidden; margin-bottom: 14px; }
+  .hero-card::before { content: ''; position: absolute; right: -24px; bottom: -24px; width: 96px; height: 96px; background: var(--red); border-radius: 50%; opacity: 0.18; }
+  .hero-greeting { font-size: 12px; color: rgba(255,255,255,0.55); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+  .hero-title { font-size: 20px; font-weight: 500; color: #fff; line-height: 1.3; margin-bottom: 10px; }
+  .hero-title span { color: #73EDFF; }
+  .hero-body { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.6; }
+  .tutor-card { background: var(--card); border-radius: 16px; border: 0.5px solid var(--border); padding: 16px; display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+  .photo-slot { width: 56px; height: 56px; border-radius: 50%; background: #e8f0fe; border: 1.5px dashed rgba(0,33,71,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; gap: 2px; }
+  .photo-slot svg { width: 18px; height: 18px; opacity: 0.4; }
+  .photo-slot span { font-size: 9px; color: var(--muted); opacity: 0.7; }
+  .tutor-name { font-size: 15px; font-weight: 500; color: var(--navy); margin-bottom: 3px; }
+  .tutor-role { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .info-card { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); padding: 14px 16px; margin-bottom: 10px; }
+  .info-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .tip-card { background: #fff8e8; border-radius: 12px; border: 0.5px solid rgba(180,115,23,0.2); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; margin-top: 4px; }
+  .tip-icon { width: 20px; height: 20px; border-radius: 50%; background: #fac775; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .tip-icon svg { width: 11px; height: 11px; }
+  .tip-text { font-size: 12px; color: #633806; line-height: 1.55; }
+  .cta-row { background: var(--red); border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; }
+  .cta-row p { color: #fff; font-size: 14px; font-weight: 500; }
+  .cta-row span { color: rgba(255,255,255,0.75); font-size: 12px; }
+  .cta-arrow { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cta-arrow svg { width: 16px; height: 16px; }
+  a.step-link { display: flex; align-items: center; justify-content: space-between; background: #f0f4f8; border-radius: 10px; padding: 10px 12px; text-decoration: none; border: 0.5px solid var(--border); margin-top: 8px; }
+  a.step-link span { font-size: 12px; font-weight: 500; color: var(--navy); }
+  a.step-link svg { width: 14px; height: 14px; }
+
+  /* ── SCREEN 1: BIENVENIDA ── */
+  /* uses common components */
+
+  /* ── SCREEN 2: PRIMEROS PASOS ── */
+  .step-card { background: var(--card); border-radius: 16px; border: 0.5px solid var(--border); padding: 16px; display: flex; flex-direction: column; margin-bottom: 10px; }
+  .step-header { display: flex; align-items: flex-start; gap: 12px; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-body { flex: 1; }
+  .step-title { font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 4px; line-height: 1.3; }
+  .step-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .step-card.highlight { border: 1.5px solid rgba(0,33,71,0.2); }
+  .step-card.highlight .step-num { background: var(--red); }
+
+  /* ── SCREEN 3: ASIGNATURAS — MAPA ── */
+  .plan-link { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 12px; border: 0.5px solid var(--border); padding: 12px 14px; text-decoration: none; margin-bottom: 12px; }
+  .plan-link span { font-size: 13px; font-weight: 500; color: var(--navy); }
+  .legend { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .map-container { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 10px; }
+
+  /* ── SCREEN 3b: RECOMENDACIONES ── */
+  .selector-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .sel-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; text-align: center; }
+  .sel-btn.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+  .block-label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; margin-top: 4px; }
+  .asig-block { background: var(--card); border-radius: 12px; border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 8px; }
+  .asig-block-header { padding: 10px 14px; background: #f0f4f8; border-bottom: 0.5px solid var(--border); }
+  .asig-block-num { font-size: 12px; font-weight: 500; color: var(--navy); }
+  .asig-block-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .asig-item { padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid var(--border); }
+  .asig-item:last-child { border-bottom: none; }
+  .asig-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--navy); flex-shrink: 0; }
+  .asig-dot.new { background: var(--red); }
+  .asig-name { font-size: 12px; color: var(--navy); line-height: 1.4; }
+  .asig-name em { color: var(--muted); font-style: normal; font-size: 11px; }
+  .screen-hidden { display: none; }
+  .screen-visible { display: block; }
+
+  /* ── SCREEN 4: CONVALIDACIONES ── */
+  .conv-card { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 10px; }
+  .conv-header { padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .conv-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .conv-icon svg { width: 16px; height: 16px; }
+  .conv-body { flex: 1; }
+  .conv-title { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 4px; line-height: 1.3; }
+  .conv-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .conv-badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; margin-top: 6px; }
+  .conv-badge.amber { background: #faeeda; color: #633806; }
+  .conv-badge.blue { background: #e8f0fe; color: #0C447C; }
+  .conv-link { display: flex; align-items: center; justify-content: space-between; background: #f0f4f8; border-top: 0.5px solid var(--border); padding: 10px 14px; text-decoration: none; }
+  .conv-link span { font-size: 12px; font-weight: 500; color: var(--navy); }
+  .conv-link svg { width: 14px; height: 14px; }
+
+  /* ── SCREEN 5: RECURSOS ── */
+  .video-card { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); overflow: hidden; text-decoration: none; display: flex; align-items: center; margin-bottom: 10px; }
+  .video-thumb { width: 72px; height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .play-btn { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+  .play-btn svg { width: 14px; height: 14px; margin-left: 2px; }
+  .video-body { flex: 1; padding: 10px 12px; }
+  .video-title { font-size: 13px; font-weight: 500; color: var(--navy); line-height: 1.35; margin-bottom: 4px; }
+  .video-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; display: inline-block; }
+  .video-badge.yt { background: #e0fbff; color: #005a6e; }
+  .video-badge.web { background: #e8f0fe; color: #0C447C; }
+  .video-arrow { padding-right: 12px; }
+  .video-arrow svg { width: 14px; height: 14px; }
+
+  /* ── SCREEN 6: TUTOR ── */
+  .tutor-hero { background: var(--navy); border-radius: 16px; padding: 18px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .photo-slot-dark { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1.5px dashed rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; gap: 2px; }
+  .photo-slot-dark svg { width: 18px; height: 18px; opacity: 0.5; }
+  .photo-slot-dark span { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .tutor-hero .name { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 3px; }
+  .tutor-hero .role { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+  .contact-row { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; margin-bottom: 12px; }
+  .contact-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #e8f0fe; }
+  .contact-icon svg { width: 18px; height: 18px; }
+  .contact-text strong { display: block; font-size: 13px; font-weight: 500; color: var(--navy); }
+  .contact-text span { font-size: 12px; color: var(--muted); }
+  .reserve-block { background: var(--card); border-radius: 16px; border: 0.5px solid var(--border); overflow: hidden; }
+  .reserve-header { background: var(--navy); padding: 14px 16px; }
+  .reserve-header p { color: #fff; font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .reserve-header span { color: rgba(255,255,255,0.65); font-size: 12px; }
+  .reserve-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .reserve-info-row { display: flex; align-items: center; gap: 10px; }
+  .reserve-info-row svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .reserve-info-row span { font-size: 12px; color: var(--muted); }
+  .reserve-btn { background: var(--red); border-radius: 12px; padding: 13px; text-align: center; text-decoration: none; display: block; }
+  .reserve-btn p { color: #fff; font-size: 14px; font-weight: 500; }
+  .reserve-btn span { color: rgba(255,255,255,0.75); font-size: 11px; }
+
+  /* ── TABS ASIGNATURAS ── */
+  .sub-tabs { display: flex; background: #e8f0fe; border-radius: 10px; padding: 3px; margin-bottom: 14px; }
+  .sub-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .sub-tab.active { background: var(--navy); color: #fff; }
+  .sub-screen { display: none; }
+  .sub-screen.active { display: block; }
+  .lang-switch { display: flex; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 2px; gap: 2px; }
+  .lang-btn { padding: 4px 10px; border-radius: 6px; border: none; background: transparent; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500; cursor: pointer; }
+  .lang-btn.active { background: rgba(255,255,255,0.25); color: #fff; }
+  [data-lang="ca"] { display: none; }
+  body.ca [data-lang="ca"] { display: block; }
+  body.ca [data-lang="es"] { display: none; }
+  body.ca .lang-btn[data-l="ca"] { background: rgba(255,255,255,0.25); color: #fff; }
+  body.ca .lang-btn[data-l="es"] { background: transparent; color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo-mark">UOC</div>
+    <span class="logo-text" data-lang="es">Grado de Economía</span>
+    <span class="logo-text" data-lang="ca">Grau d'Economia</span>
+    <div style="margin-left:auto">
+      <div class="lang-switch">
+        <button class="lang-btn active" data-l="es" onclick="setLang('es')">ES</button>
+        <button class="lang-btn" data-l="ca" onclick="setLang('ca')">CA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- ══ S1: BIENVENIDA ══ -->
+    <div class="screen active" id="s-home">
+      <div class="hero-card">
+        <div class="hero-greeting" data-lang="es">Bienvenido/a</div><div class="hero-greeting" data-lang="ca">Benvingut/da</div>
+        <div class="hero-title" data-lang="es">Tu guía para <span style="color:#73EDFF">el primer año</span></div><div class="hero-title" data-lang="ca">La teva guia per al <span style="color:#73EDFF">primer any</span></div>
+        <div class="hero-body" data-lang="es">Esta app es tu punto de partida en la UOC. Aquí encontrarás todo lo que necesitas para no perderte en los primeros pasos.</div><div class="hero-body" data-lang="ca">Aquesta app és el teu punt de partida a la UOC. Aquí trobaràs tot el que necessites per no perdre't en els primers passos.</div>
+      </div>
+      <div class="tutor-card">
+        <div class="photo-slot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span>foto</span>
+        </div>
+        <div>
+          <div class="tutor-name" data-lang="es">Hola, soy Óscar</div><div class="tutor-name" data-lang="ca">Hola, soc l'Óscar</div>
+          <div class="tutor-role" data-lang="es">Tu tutor de inicio del Grado de Economía<br>Estoy aquí para acompañarte en esta nueva etapa.</div><div class="tutor-role" data-lang="ca">El teu tutor d'inici del Grau d'Economia<br>Estic aquí per acompanyar-te en aquesta nova etapa.</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <p data-lang="es">Mi objetivo es orientarte durante el proceso de incorporación y acompañarte durante tus dos primeros semestres en el grado.</p><p data-lang="ca">El meu objectiu és orientar-te durant el procés d'incorporació i acompanyar-te durant els teus dos primers semestres al grau.</p>
+      </div>
+      <a href="#" onclick="goTo('pasos', document.querySelectorAll('.nav-item')[1]); return false;" style="background:#FF7D87;border-radius:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;margin-top:2px">
+        <div>
+          <p style="color:#fff;font-size:14px;font-weight:500" data-lang="es">¿Por dónde empiezo?</p><p style="color:#fff;font-size:14px;font-weight:500" data-lang="ca">Per on començo?</p>
+          <span style="color:rgba(255,255,255,0.75);font-size:12px" data-lang="es">Explora las secciones de la app</span><span style="color:rgba(255,255,255,0.75);font-size:12px" data-lang="ca">Explora les seccions de l'app</span>
+        </div>
+        <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+    </div>
+
+    <!-- ══ S2: PRIMEROS PASOS ══ -->
+    <div class="screen" id="s-pasos">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px" data-lang="es">Antes de formalizar la matrícula, hay tres pasos que debes completar.</p><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px" data-lang="ca">Abans de formalitzar la matrícula, hi ha tres passos que has de completar.</p>
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title" data-lang="es">Cuestionario de ampliación de datos</div><div class="step-title" data-lang="ca">Qüestionari d'ampliació de dades</div>
+            <div class="step-desc" data-lang="es">Completa tu perfil de estudiante en el campus virtual. Me ayudará a conocerte mejor y asesorarte de forma personalizada.</div><div class="step-desc" data-lang="ca">Completa el teu perfil d'estudiant al campus virtual. M'ajudarà a conèixer-te millor i assessorar-te de forma personalitzada.</div>
+          </div>
+        </div>
+        <a class="step-link" href="https://campus.uoc.edu/webapps/cas/login?service=https://campus.uoc.edu/tren/trenacc%3Fmodul=GAT_EXP.PERFILESTUDIANTE/!PerfilEstudiante_WEB.Inici">
+          <span data-lang="es">Ir al cuestionario</span><span data-lang="ca">Anar al qüestionari</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title" data-lang="es">Documentación de acceso</div><div class="step-title" data-lang="ca">Documentació d'accés</div>
+            <div class="step-desc" data-lang="es">Prepara la documentación necesaria para formalizar tu acceso al grado. Tendrás 10 días hábiles para enviarla una vez formalices la matrícula.</div><div class="step-desc" data-lang="ca">Prepara la documentació necessària per formalitzar el teu accés al grau. Tindràs 10 dies hàbils per enviar-la un cop formalitzis la matrícula.</div>
+          </div>
+        </div>
+        <a class="step-link" href="https://campus.uoc.edu/estudiant/tramits/es/documentacio/grau/index.html">
+          <span data-lang="es">Ver documentación requerida</span><span data-lang="ca">Veure la documentació requerida</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title" data-lang="es">Propuesta de matrícula</div><div class="step-title" data-lang="ca">Proposta de matrícula</div>
+            <div class="step-desc" data-lang="es">Realiza tu propuesta de matrícula y espera mi revisión. Una vez tutorizada y validada, será el momento para que la formalices.</div><div class="step-desc" data-lang="ca">Fes la teva proposta de matrícula i espera la meva revisió. Un cop tutoritzada i validada, serà el moment perquè la formalitzis.</div>
+          </div>
+        </div>
+        <a class="step-link" href="https://campus.uoc.edu/estudiant/tramits/es/matricula/matricula_grau/index_incorporacio.html">
+          <span data-lang="es">Ir a la propuesta de matrícula</span><span data-lang="ca">Anar a la proposta de matrícula</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#633806" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <p class="tip-text" data-lang="es">No formalices la matrícula hasta que haya tutorizado y validado tu propuesta. Te avisaré cuando esté lista.</p><p class="tip-text" data-lang="ca">No formalitzis la matrícula fins que hagi tutoritzat i validat la teva proposta. T'avisaré quan estigui llesta.</p>
+      </div>
+    </div>
+
+    <!-- ══ S3: ASIGNATURAS ══ -->
+    <div class="screen" id="s-asig">
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="switchSubTab('recom')"><span data-lang="es">Recomendaciones</span><span data-lang="ca">Recomanacions</span></button>
+        <button class="sub-tab" onclick="switchSubTab('mapa')"><span data-lang="es">Mapa de asignaturas</span><span data-lang="ca">Mapa d'assignatures</span></button>
+      </div>
+
+      <!-- MAPA -->
+      <div class="sub-screen" id="sub-mapa">
+        <p style="font-size:13px;color:#6b7a8d;line-height:1.6;margin-bottom:12px">Algunas asignaturas requieren haber cursado otras previamente. Consulta el mapa antes de planificar tu matrícula.</p>
+      <a class="plan-link" href="https://campus.uoc.edu/estudiant/mes-uoc/es/universitat/plans/GR62/index.html">
+          <span data-lang="es">Plan de estudios del Grado de Economía</span><span data-lang="ca">Pla d'estudis del Grau d'Economia</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <div class="legend" style="padding-left:24px">
+          <div class="legend-item">
+            <svg width="24" height="10" viewBox="0 0 24 10"><defs><marker id="la" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/></marker></defs><line x1="0" y1="5" x2="18" y2="5" stroke="#185FA5" stroke-width="1.5" marker-end="url(#la)"/></svg>
+            <span data-lang="es">Prerequisito</span><span data-lang="ca">Prerequisit</span>
+          </div>
+          <div class="legend-item">
+            <svg width="24" height="10" viewBox="0 0 24 10"><defs><marker id="lb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#6b7a8d" stroke-width="1.5" stroke-linecap="round"/></marker></defs><line x1="0" y1="5" x2="18" y2="5" stroke="#6b7a8d" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#lb)"/></svg>
+            <span data-lang="es">Recomendado antes</span><span data-lang="ca">Recomanat abans</span>
+          </div>
+        </div>
+        <div class="map-container">
+          <svg width="100%" viewBox="0 0 680 920" role="img">
+            <title>Mapa de prerequisitos de asignaturas</title>
+            <desc>Flujo de dependencias entre asignaturas del Grado de Economía UOC</desc>
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+            <!-- ROW LABELS -->
+            <text font-size="12" x="18" y="58" text-anchor="start" fill="#6b7a8d">Matemáticas</text>
+            <text font-size="12" x="18" y="208" text-anchor="start" fill="#6b7a8d">Estadística</text>
+            <text font-size="12" x="18" y="395" text-anchor="start" fill="#6b7a8d">Micro/Macro</text>
+            <text font-size="12" x="18" y="620" text-anchor="start" fill="#6b7a8d">Empresa</text>
+            <text font-size="12" x="18" y="740" text-anchor="start" fill="#6b7a8d">Digital/Inglés</text>
+
+            <!-- SEPARATORS -->
+            <line x1="18" y1="120" x2="662" y2="120" stroke="#002147" stroke-width="0.3" stroke-dasharray="2,5"/>
+            <line x1="18" y1="270" x2="662" y2="270" stroke="#002147" stroke-width="0.3" stroke-dasharray="2,5"/>
+            <line x1="18" y1="590" x2="662" y2="590" stroke="#002147" stroke-width="0.3" stroke-dasharray="2,5"/>
+            <line x1="18" y1="710" x2="662" y2="710" stroke="#002147" stroke-width="0.3" stroke-dasharray="2,5"/>
+
+            <!-- CADENA 1: Matemáticas y=30, h=56, cy=58 -->
+            <rect x="120" y="30" width="175" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="207" y="50" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Fundamentos de</text>
+            <text font-size="12" font-weight="500" x="207" y="68" text-anchor="middle" dominant-baseline="central" fill="#0C447C">matemáticas</text>
+
+            <line x1="295" y1="58" x2="333" y2="58" stroke="#185FA5" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="335" y="30" width="175" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="422" y="50" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Fundamentos de</text>
+            <text font-size="12" font-weight="500" x="422" y="68" text-anchor="middle" dominant-baseline="central" fill="#0C447C">estadística</text>
+
+            <!-- Fund. estadística → Inferencia -->
+            <line x1="422" y1="86" x2="422" y2="178" stroke="#185FA5" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <!-- CADENA 2: Estadística y=180 -->
+            <rect x="335" y="180" width="175" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="422" y="200" text-anchor="middle" dominant-baseline="central" fill="#0C447C">Inferencia</text>
+            <text font-size="12" font-weight="500" x="422" y="218" text-anchor="middle" dominant-baseline="central" fill="#0C447C">estadística</text>
+
+            <!-- RECOMENDADO: Fund. matemáticas → Intro. microec -->
+            <path d="M207 86 L207 298" stroke="#6b7a8d" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)" fill="none"/>
+
+            <!-- CADENA 3: Micro/Macro y=300 -->
+            <rect x="120" y="300" width="175" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="207" y="320" text-anchor="middle" dominant-baseline="central" fill="#085041">Introducción a la</text>
+            <text font-size="12" font-weight="500" x="207" y="338" text-anchor="middle" dominant-baseline="central" fill="#085041">microeconomía</text>
+
+            <line x1="295" y1="328" x2="333" y2="328" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="335" y="300" width="175" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="422" y="320" text-anchor="middle" dominant-baseline="central" fill="#085041">Introducción a la</text>
+            <text font-size="12" font-weight="500" x="422" y="338" text-anchor="middle" dominant-baseline="central" fill="#085041">macroeconomía</text>
+
+            <!-- Intro microec ↓ Microeconomía -->
+            <line x1="207" y1="356" x2="207" y2="448" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <!-- Intro macroec ↓ Macroeconomía -->
+            <line x1="422" y1="356" x2="422" y2="448" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="120" y="450" width="175" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+            <text font-size="13" font-weight="500" x="207" y="478" text-anchor="middle" dominant-baseline="central" fill="#085041">Microeconomía</text>
+
+            <rect x="335" y="450" width="175" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+            <text font-size="13" font-weight="500" x="422" y="478" text-anchor="middle" dominant-baseline="central" fill="#085041">Macroeconomía</text>
+
+            <!-- CADENA 4: Empresa y=600 -->
+            <rect x="120" y="600" width="175" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="207" y="620" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Introducción a</text>
+            <text font-size="12" font-weight="500" x="207" y="638" text-anchor="middle" dominant-baseline="central" fill="#3C3489">la empresa</text>
+
+            <line x1="295" y1="628" x2="333" y2="628" stroke="#534AB7" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="335" y="600" width="210" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+            <text font-size="11" font-weight="500" x="440" y="620" text-anchor="middle" dominant-baseline="central" fill="#3C3489">Introducción a la</text>
+            <text font-size="11" font-weight="500" x="440" y="638" text-anchor="middle" dominant-baseline="central" fill="#3C3489">información financiera</text>
+
+            <!-- CADENA 5: Digital/Inglés y=720 -->
+            <rect x="120" y="720" width="150" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+            <text font-size="12" font-weight="500" x="195" y="740" text-anchor="middle" dominant-baseline="central" fill="#712B13">Competencias</text>
+            <text font-size="12" font-weight="500" x="195" y="758" text-anchor="middle" dominant-baseline="central" fill="#712B13">digitales</text>
+
+            <line x1="270" y1="748" x2="286" y2="748" stroke="#993C1D" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="288" y="720" width="135" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+            <text font-size="13" font-weight="500" x="355" y="748" text-anchor="middle" dominant-baseline="central" fill="#712B13">Inglés B2.1</text>
+
+            <line x1="423" y1="748" x2="439" y2="748" stroke="#993C1D" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="441" y="720" width="135" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+            <text font-size="13" font-weight="500" x="508" y="748" text-anchor="middle" dominant-baseline="central" fill="#712B13">Inglés B2.2</text>
+
+          </svg>
+        </div>
+
+      <!-- PDF placeholder -->
+      <a href="PDF_MAPA_ASIGNATURAS_AQUI" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;border:0.5px solid rgba(0,33,71,0.12);padding:12px 14px;text-decoration:none;margin-top:4px;opacity:0.5;pointer-events:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8" width="16" height="16"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div>
+            <p style="font-size:13px;font-weight:500;color:#002147" data-lang="es">Mapa completo de asignaturas</p><p style="font-size:13px;font-weight:500;color:#002147" data-lang="ca">Mapa complet d'assignatures</p>
+            <p style="font-size:11px;color:#6b7a8d" data-lang="es">PDF descargable · Próximamente</p><p style="font-size:11px;color:#6b7a8d" data-lang="ca">PDF descarregable · Properament</p>
+          </div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      </div>
+
+      <!-- RECOMENDACIONES -->
+      <div class="sub-screen active" id="sub-recom">
+        <div style="background:var(--navy);border-radius:14px;padding:14px 16px;margin-bottom:12px">
+          <p style="font-size:12px;color:rgba(255,255,255,0.78);line-height:1.6" data-lang="es">Cada asignatura requiere entre 8 y 10 horas semanales de estudio. Te recomiendo una primera matrícula conservadora para adaptarte bien a la metodología de la UOC.</p><p style="font-size:12px;color:rgba(255,255,255,0.78);line-height:1.6" data-lang="ca">Cada assignatura requereix entre 8 i 10 hores setmanals d'estudi. Et recomano una primera matrícula conservadora per adaptar-te bé a la metodologia de la UOC.</p>
+        </div>
+        <div class="tip-card" style="margin-bottom:12px">
+          <div class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#633806" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div>
+          <p class="tip-text" data-lang="es">¿Matemáticas? Si tu base es sólida (bachillerato), empieza por Fundamentos de matemáticas. Si necesitas repasar, comienza con Iniciación a las matemáticas.</p><p class="tip-text" data-lang="ca">Matemàtiques? Si la teva base és sòlida (batxillerat), comença per Fonaments de matemàtiques. Si necessites repassar, comença amb Iniciació a les matemàtiques.</p>
+        </div>
+        <div class="selector-row">
+          <button class="sel-btn active" onclick="switchSel('oct')"><span data-lang="es">Septiembre</span><span data-lang="ca">Setembre</span></button>
+          <button class="sel-btn" onclick="switchSel('feb')"><span data-lang="es">Febrero</span><span data-lang="ca">Febrer</span></button>
+        </div>
+        <div id="b-oct" class="screen-visible">
+          <p class="block-label"><span data-lang="es">Opciones según el número de asignaturas</span><span data-lang="ca">Opcions segons el nombre d'assignatures</span></p>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">1 asignatura</span><span data-lang="ca">1 assignatura</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa <em>o</em> Historia económica</span><span data-lang="ca">Introducció a l'empresa <em>o</em> Història econòmica</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">2 asignaturas</span><span data-lang="ca">2 assignatures</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Historia económica</span><span data-lang="ca">Història econòmica</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">3 asignaturas</span><span data-lang="ca">3 assignatures</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Historia económica</span><span data-lang="ca">Història econòmica</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa</span><span data-lang="ca">Introducció a l'empresa</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">4 asignaturas</span><span data-lang="ca">4 assignatures</span></div><div class="asig-block-desc"><span data-lang="es">Máximo aconsejado el primer semestre</span><span data-lang="ca">Màxim aconsellat el primer semestre</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Historia económica</span><span data-lang="ca">Història econòmica</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa</span><span data-lang="ca">Introducció a l'empresa</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Sociología</span><span data-lang="ca">Sociologia</span></div></div></div>
+        </div>
+        <div id="b-feb" class="screen-hidden">
+          <p class="block-label"><span data-lang="es">Opciones según el número de asignaturas</span><span data-lang="ca">Opcions segons el nombre d'assignatures</span></p>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">1 asignatura</span><span data-lang="ca">1 assignatura</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa <em>o</em> Política y sociedad</span><span data-lang="ca">Introducció a l'empresa <em>o</em> Política i societat</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">2 asignaturas</span><span data-lang="ca">2 assignatures</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa</span><span data-lang="ca">Introducció a l'empresa</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">3 asignaturas</span><span data-lang="ca">3 assignatures</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa</span><span data-lang="ca">Introducció a l'empresa</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Política y sociedad</span><span data-lang="ca">Política i societat</span></div></div></div>
+          <div class="asig-block"><div class="asig-block-header"><div class="asig-block-num"><span data-lang="es">4 asignaturas</span><span data-lang="ca">4 assignatures</span></div><div class="asig-block-desc"><span data-lang="es">Máximo aconsejado el primer semestre</span><span data-lang="ca">Màxim aconsellat el primer semestre</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Fundamentos de matemáticas <em>o</em> Iniciación a las matemáticas</span><span data-lang="ca">Fonaments de matemàtiques <em>o</em> Iniciació a les matemàtiques</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Introducción a la empresa</span><span data-lang="ca">Introducció a l'empresa</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Política y sociedad</span><span data-lang="ca">Política i societat</span></div></div><div class="asig-item"><div class="asig-dot"></div><div class="asig-name"><span data-lang="es">Sociología</span><span data-lang="ca">Sociologia</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S4: CONVALIDACIONES ══ -->
+    <div class="screen" id="s-conval">
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon" style="background:#e1f5ee"><svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+          <div class="conv-body">
+            <div class="conv-title" data-lang="es">Estudios previos (EEP)</div><div class="conv-title" data-lang="ca">Avaluació d'Estudis Previs (AEP)</div>
+            <div class="conv-desc" data-lang="es">Permite convalidar asignaturas cursadas en otros grados universitarios o en Ciclos Formativos de Grado Superior (CFGS). Incluye también la convalidación de las asignaturas de inglés con certificado B2 o superior.</div><div class="conv-desc" data-lang="ca">Permet convalidar assignatures cursades en altres graus universitaris o en Cicles Formatius de Grau Superior (CFGS). Inclou també la convalidació de les assignatures d'anglès amb certificat B2 o superior.</div>
+            <span class="conv-badge amber"><span data-lang="es">Se abre una vez por semestre</span><span data-lang="ca">S'obre un cop per semestre</span></span>
+          </div>
+        </div>
+        <a class="conv-link" href="https://campus.uoc.edu/estudiant/tramits/es/convalidacions/estudis_previs/index.html"><span data-lang="es">Solicitar EEP</span><span data-lang="ca">Sol·licitar AEP</span><svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon" style="background:#e8f0fe"><svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg></div>
+          <div class="conv-body">
+            <div class="conv-title" data-lang="es">Certificado de inglés B2 o superior</div><div class="conv-title" data-lang="ca">Certificat d'anglès B2 o superior</div>
+            <div class="conv-desc" data-lang="es">Con un certificado oficial B2 o superior puedes convalidar las dos asignaturas de inglés del grado. La solicitud se tramita dentro de la EEP.</div><div class="conv-desc" data-lang="ca">Amb un certificat oficial B2 o superior pots convalidar les dues assignatures d'anglès del grau. La sol·licitud es tramita dins de l'AEP.</div>
+            <span class="conv-badge blue"><span data-lang="es">Se solicita dentro de la EEP</span><span data-lang="ca">Es sol·licita dins de l'AEP</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon" style="background:#eeedfe"><svg viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div class="conv-body">
+            <div class="conv-title" data-lang="es">Experiencia profesional (RAEP)</div><div class="conv-title" data-lang="ca">Experiència professional (RAEP)</div>
+            <div class="conv-desc" data-lang="es">Reconocimiento Académico de la Experiencia Profesional. Permite reconocer créditos por tu trayectoria laboral.</div><div class="conv-desc" data-lang="ca">Reconeixement Acadèmic de l'Experiència Professional. Permet reconèixer crèdits per la teva trajectòria laboral.</div>
+            <span class="conv-badge amber"><span data-lang="es">Se abre una vez por semestre</span><span data-lang="ca">S'obre un cop per semestre</span></span>
+          </div>
+        </div>
+        <a class="conv-link" href="https://campus.uoc.edu/estudiant/tramits/es/convalidacions/experiencia_professional/index.html"><span data-lang="es">Solicitar RAEP</span><span data-lang="ca">Sol·licitar RAEP</span><svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon" style="background:#faeeda"><svg viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="conv-body">
+            <div class="conv-title" data-lang="es">Traslado de expediente</div><div class="conv-title" data-lang="ca">Trasllat d'expedient</div>
+            <div class="conv-desc" data-lang="es">Si vienes de un Grado de Economía en otra universidad, deberás solicitar el traslado de expediente. Si es un grado diferente, no es necesario.</div><div class="conv-desc" data-lang="ca">Si véns d'un Grau d'Economia en una altra universitat, hauràs de sol·licitar el trasllat d'expedient. Si és un grau diferent, no és necessari.</div>
+          </div>
+        </div>
+        <a class="conv-link" href="https://campus.uoc.edu/estudiant/tramits/es/altres_tramits/trasllat_expedient/index.html"><span data-lang="es">Solicitar traslado de expediente</span><span data-lang="ca">Sol·licitar trasllat d'expedient</span><svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#633806" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <p class="tip-text"><span data-lang="es">Si tienes dudas sobre qué trámite te corresponde, consúltame antes de solicitarlo. Algunos plazos son limitados y conviene no perderlos.</span><span data-lang="ca">Si tens dubtes sobre quin tràmit et correspon, consulta'm abans de sol·licitar-lo. Alguns terminis són limitats i convé no perdre'ls.</span></p>
+      </div>
+    </div>
+
+    <!-- ══ S5: RECURSOS ══ -->
+    <div class="screen" id="s-recursos">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px" data-lang="es">Vídeos y recursos para ayudarte a entender cómo funciona la UOC y acompañarte en los primeros pasos.</p><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px" data-lang="ca">Vídeos i recursos per ajudar-te a entendre com funciona la UOC i acompanyar-te en els primers passos.</p>
+      <a class="video-card" href="https://www.youtube.com/watch?v=YK6tc8f4Nhk">
+        <div class="video-thumb" style="background:#FF7D87"><div class="play-btn"><svg viewBox="0 0 24 24" fill="white" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <div class="video-body"><div class="video-title"><span data-lang="es">Cómo te acompaño como tutor</span><span data-lang="ca">Com t'acompanyo com a tutor</span></div><span class="video-badge yt">YouTube</span></div>
+        <div class="video-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=xenLnc_plFk&t=154s">
+        <div class="video-thumb" style="background:var(--navy)"><div class="play-btn"><svg viewBox="0 0 24 24" fill="white" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <div class="video-body"><div class="video-title"><span data-lang="es">Cómo presentar la documentación de acceso</span><span data-lang="ca">Com presentar la documentació d'accés</span></div><span class="video-badge yt">YouTube</span></div>
+        <div class="video-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=_k3hvYXymes">
+        <div class="video-thumb" style="background:#0F6E56"><div class="play-btn"><svg viewBox="0 0 24 24" fill="white" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <div class="video-body"><div class="video-title"><span data-lang="es">Cómo convalidar estudios</span><span data-lang="ca">Com convalidar estudis</span></div><span class="video-badge yt">YouTube</span></div>
+        <div class="video-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=Z6uuvBfbSgw&t=8s">
+        <div class="video-thumb" style="background:#534AB7"><div class="play-btn"><svg viewBox="0 0 24 24" fill="white" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <div class="video-body"><div class="video-title"><span data-lang="es">Cómo se estudia en la UOC</span><span data-lang="ca">Com s'estudia a la UOC</span></div><span class="video-badge yt">YouTube</span></div>
+        <div class="video-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </a>
+      <a class="video-card" href="https://campus.uoc.edu/estudiant/microsites/lms_estudiants_cursos/es/index.html">
+        <div class="video-thumb" style="background:#854F0B"><div class="play-btn"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div></div>
+        <div class="video-body"><div class="video-title"><span data-lang="es">Funcionamiento del aula virtual</span><span data-lang="ca">Funcionament de l'aula virtual</span></div><span class="video-badge web">Campus UOC</span></div>
+        <div class="video-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </a>
+    </div>
+
+    <!-- ══ S6: TUTOR ══ -->
+    <div class="screen" id="s-tutor">
+      <div class="tutor-hero">
+        <div class="photo-slot-dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="18" height="18"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span>foto</span>
+        </div>
+        <div>
+          <div class="name">Óscar Blázquez</div>
+          <div class="role" data-lang="es">Tutor de inicio · Grado de Economía<br>Universitat Oberta de Catalunya</div><div class="role" data-lang="ca">Tutor d'inici · Grau d'Economia<br>Universitat Oberta de Catalunya</div>
+        </div>
+      </div>
+      <p class="section-label" data-lang="es">Contacto</p><p class="section-label" data-lang="ca">Contacte</p>
+      <a class="contact-row" href="mailto:oblazquez@uoc.edu">
+        <div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+        <div class="contact-text">
+          <strong data-lang="es">Correo electrónico</strong><strong data-lang="ca">Correu electrònic</strong>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+            <span>oblazquez@uoc.edu</span>
+            <button onclick="event.preventDefault();navigator.clipboard.writeText('oblazquez@uoc.edu').then(()=>{const t=this.querySelector('.copied-msg');t.style.opacity='1';setTimeout(()=>{t.style.opacity='0'},1500)})" style="background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;position:relative" title="Copiar correo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span class="copied-msg" style="position:absolute;left:18px;top:-18px;background:#002147;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity 0.2s;pointer-events:none"><span data-lang="es">¡Copiado!</span><span data-lang="ca">Copiat!</span></span>
+            </button>
+          </div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p class="section-label" data-lang="es">Reserva de tutoría</p><p class="section-label" data-lang="ca">Reserva de tutoria</p>
+      <div class="reserve-block">
+        <div class="reserve-header">
+          <p data-lang="es">Videotutoría individual</p><p data-lang="ca">Videotutoria individual</p>
+          <span data-lang="es">Sesión personalizada de 30 minutos</span><span data-lang="ca">Sessió personalitzada de 30 minuts</span>
+        </div>
+        <div class="reserve-body">
+          <div class="reserve-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span data-lang="es">Duración: 30 minutos</span><span data-lang="ca">Durada: 30 minuts</span></div>
+          <div class="reserve-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-lang="es">Elige la franja que mejor te venga</span><span data-lang="ca">Tria la franja que millor et vagi</span></div>
+          <div class="reserve-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><path d="M15 10l4.553-2.069A1 1 0 0121 8.82V15.18a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg><span data-lang="es">Videollamada por Google Meet</span><span data-lang="ca">Videotrucada per Google Meet</span></div>
+          <a class="reserve-btn" href="https://calendar.app.google/4h9HPY7vnzgEpu3F7"><p data-lang="es">Reservar tutoría</p><p data-lang="ca">Reservar tutoria</p><span data-lang="es">Ver disponibilidad</span><span data-lang="ca">Veure disponibilitat</span></a>
+        </div>
+      </div>
+    </div>
+
+  <!-- ══ S7: REMATRÍCULA ══ -->
+    <div class="screen" id="s-rematricula">
+      <div style="background:#002147;border-radius:18px;padding:22px 20px;position:relative;overflow:hidden;margin-bottom:14px">
+        <div style="position:absolute;right:-24px;bottom:-24px;width:96px;height:96px;background:#73EDFF;border-radius:50%;opacity:0.2"></div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px"><span data-lang="es">Rematrícula</span><span data-lang="ca">Rematrícula</span></div>
+        <div style="font-size:20px;font-weight:500;color:#fff;margin-bottom:10px"><span data-lang="es">Propuesta de matrícula <span style="color:#73EDFF">segundo y tercer semestre</span></span><span data-lang="ca">Proposta de matrícula <span style="color:#73EDFF">segon i tercer semestre</span></span></div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.72);line-height:1.6"><span data-lang="es">Antes de formalizar tu matrícula del próximo semestre, envíame tu propuesta para que pueda orientarte.</span><span data-lang="ca">Abans de formalitzar la teva matrícula del proper semestre, envia'm la teva proposta perquè pugui orientar-te.</span></div>
+      </div>
+
+      <div id="rematricula-cerrada" style="display:block">
+        <div style="background:#fff;border-radius:14px;border:0.5px solid rgba(0,33,71,0.12);padding:24px 16px;text-align:center;margin-bottom:12px">
+          <div style="width:56px;height:56px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8" width="24" height="24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <p style="font-size:15px;font-weight:500;color:#002147;margin-bottom:8px" data-lang="es">Esta sección se abrirá próximamente</p><p style="font-size:15px;font-weight:500;color:#002147;margin-bottom:8px" data-lang="ca">Aquesta secció s'obrirà properament</p>
+          <p style="font-size:13px;color:#6b7a8d;line-height:1.6" data-lang="es">Durante el período de rematrícula podrás enviarme tu propuesta de asignaturas para el segundo y tercer semestre antes de formalizarla.</p><p style="font-size:13px;color:#6b7a8d;line-height:1.6" data-lang="ca">Durant el període de rematrícula podràs enviar-me la teva proposta d'assignatures per al segon i tercer semestre abans de formalitzar-la.</p>
+        </div>
+        <div style="background:#fff8e8;border-radius:12px;border:0.5px solid rgba(180,115,23,0.2);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#fac775;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#633806" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <p style="font-size:12px;color:#633806;line-height:1.55" data-lang="es">Te avisaré por correo cuando el formulario esté disponible. El plazo estará abierto durante dos semanas.</p><p style="font-size:12px;color:#633806;line-height:1.55" data-lang="ca">T'avisaré per correu quan el formulari estigui disponible. El termini estarà obert durant dues setmanes.</p>
+        </div>
+      </div>
+
+      <div id="rematricula-abierta" style="display:none">
+        <div style="background:#fff;border-radius:14px;border:0.5px solid rgba(0,33,71,0.12);padding:16px;margin-bottom:10px">
+          <p style="font-size:13px;color:#6b7a8d;line-height:1.6;margin-bottom:14px" data-lang="es">El plazo está abierto. Envíame tu propuesta de asignaturas para que pueda orientarte antes de que formalices la matrícula.</p><p style="font-size:13px;color:#6b7a8d;line-height:1.6;margin-bottom:14px" data-lang="ca">El termini està obert. Envia'm la teva proposta d'assignatures perquè pugui orientar-te abans que formalitzis la matrícula.</p>
+          <a href="ENLACE_GOOGLE_FORM_AQUI" style="display:block;background:#FF7D87;border-radius:12px;padding:13px;text-align:center;text-decoration:none">
+            <p style="color:#fff;font-size:14px;font-weight:500" data-lang="es">Enviar propuesta de matrícula</p><p style="color:#fff;font-size:14px;font-weight:500" data-lang="ca">Enviar proposta de matrícula</p>
+            <span style="color:rgba(255,255,255,0.75);font-size:11px" data-lang="es">Formulario Google</span><span style="color:rgba(255,255,255,0.75);font-size:11px" data-lang="ca">Formulari Google</span>
+          </a>
+        </div>
+        <div style="background:#fff8e8;border-radius:12px;border:0.5px solid rgba(180,115,23,0.2);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#fac775;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#633806" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <p style="font-size:12px;color:#633806;line-height:1.55" data-lang="es">Una vez revisada tu propuesta, te contactaré antes de que puedas formalizar la matrícula.</p><p style="font-size:12px;color:#633806;line-height:1.55" data-lang="ca">Un cop revisada la teva proposta, et contactaré abans que puguis formalitzar la matrícula.</p>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;border:0.5px solid rgba(0,33,71,0.12);padding:14px 16px;margin-top:10px">
+        <p style="font-size:13px;color:#6b7a8d;line-height:1.6" data-lang="es">Una vez completada tu tercera matrícula, pasarás a ser acompañado/a por un/a tutor/a de seguimiento hasta el final de tus estudios.</p>
+        <p style="font-size:13px;color:#6b7a8d;line-height:1.6" data-lang="ca">Un cop completada la teva tercera matrícula, passaràs a ser acompanyat/ada per un/a tutor/a de seguiment fins al final dels teus estudis.</p>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="goTo('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#002147" stroke-width="1.8"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
+      <span class="nav-label"><span data-lang="es">Inicio</span><span data-lang="ca">Inici</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('pasos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <span class="nav-label"><span data-lang="es">Pasos</span><span data-lang="ca">Passos</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('asig',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span class="nav-label"><span data-lang="es">Asignaturas</span><span data-lang="ca">Assignatures</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('conval',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span class="nav-label"><span data-lang="es">Convalidaciones</span><span data-lang="ca">Convalidacions</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('recursos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="nav-label"><span data-lang="es">Recursos</span><span data-lang="ca">Recursos</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('rematricula',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span class="nav-label"><span data-lang="es">Rematrícula</span><span data-lang="ca">Rematrícula</span></span>
+    </button>
+    <button class="nav-item" onclick="goTo('tutor',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7a8d" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="nav-label"><span data-lang="es">Tutor</span><span data-lang="ca">Tutor</span></span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+function goTo(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.remove('active');
+    b.querySelectorAll('path,rect,circle,polyline,line,polygon').forEach(el => el.setAttribute('stroke','#6b7a8d'));
+  });
+  btn.classList.add('active');
+  btn.querySelectorAll('path,rect,circle,polyline,line,polygon').forEach(el => el.setAttribute('stroke','#002147'));
+  document.querySelector('.screens').scrollTop = 0;
+}
+function switchSubTab(tab) {
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sub-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('sub-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+function setLang(lang) {
+  document.body.classList.remove('es','ca');
+  document.body.classList.add(lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.lang-btn[data-l="'+lang+'"]').classList.add('active');
+  localStorage.setItem('uoc-lang', lang);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('uoc-lang') || 'es';
+  setLang(saved);
+});
+function switchSel(sem) {
+  const oct = document.getElementById('b-oct');
+  const feb = document.getElementById('b-feb');
+  const btns = document.querySelectorAll('.sel-btn');
+  if (sem === 'oct') {
+    oct.className = 'screen-visible'; feb.className = 'screen-hidden';
+    btns[0].classList.add('active'); btns[1].classList.remove('active');
+  } else {
+    oct.className = 'screen-hidden'; feb.className = 'screen-visible';
+    btns[0].classList.remove('active'); btns[1].classList.add('active');
+  }
+}
+</script>
+</body>
+</html>
