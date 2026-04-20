@@ -1,13 +1,8 @@
-const CACHE = 'uoc-app-v1';
-const ASSETS = [
-  './index.html',
-  './manifest.json'
-];
+const CACHE = 'uoc-app-v2';
+const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -22,6 +17,14 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request).then(response => {
+      const clone = response.clone();
+      caches.open(CACHE).then(cache => cache.put(e.request, clone));
+      return response;
+    }).catch(() => caches.match(e.request))
   );
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.action === 'skipWaiting') self.skipWaiting();
 });
